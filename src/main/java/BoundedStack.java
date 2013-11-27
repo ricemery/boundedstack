@@ -2,6 +2,7 @@ import com.google.common.base.Optional;
 
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -9,6 +10,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class BoundedStack<T> {
    private final Deque<T> list = new ConcurrentLinkedDeque<>();
    private final int maxEntries;
+   private final ReentrantLock lock = new ReentrantLock();
+
 
    public BoundedStack(final int maxEntries) {
       checkArgument(maxEntries > 0, "maxEntries must be greater than zero");
@@ -18,9 +21,14 @@ public class BoundedStack<T> {
    public void push(T item) {
       checkNotNull(item, "item must not be null");
 
-      list.push(item);
-      if (list.size() > maxEntries) {
-         list.removeLast();
+      lock.lock();
+      try {
+         list.push(item);
+         if (list.size() > maxEntries) {
+            list.removeLast();
+         }
+      } finally {
+         lock.unlock();
       }
    }
 
