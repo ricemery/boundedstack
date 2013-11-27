@@ -18,7 +18,7 @@ public class BoundedStack<T> {
       this.maxEntries = maxEntries;
    }
 
-   public void push(T item) {
+   public void push(final T item) {
       checkNotNull(item, "item must not be null");
 
       lock.lock();
